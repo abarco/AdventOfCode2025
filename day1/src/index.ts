@@ -54,7 +54,7 @@ function parseTurn(turn: string): Turn {
  * @param dialStart Initial Dial number location. Can start from 0 to 99
  * @returns The number of times that the Dial stops at the 0 spot. 
  */
-function decodeDialPassword(inputInstructions: Turn[], dialStart: number): number {
+function decodeDialPasswordNoClick(inputInstructions: Turn[], dialStart: number): number {
 	let zeroCount: number = 0;
 	let currentDial: number = dialStart;
 
@@ -69,6 +69,54 @@ function decodeDialPassword(inputInstructions: Turn[], dialStart: number): numbe
 	}
 
 	return zeroCount;
+}
+
+function decodeDialPasswordWithClick(inputInstructions: Turn[], dialStart: number): number {
+	let zeroCount: number = 0;
+	let currentDial: number = dialStart;
+	let clicks: number;
+
+	debugFlag && console.log(`- The dial starts by pointing at ${dialStart}`);
+
+	for(let instruction of inputInstructions) {
+		[clicks, currentDial] = countClick(instruction, currentDial);
+		zeroCount += clicks;
+
+		if(debugFlag) {
+			if(clicks) {
+				console.log(`- The dial is rotated ${instruction} to point at ${currentDial}; \n during this rotation, it points at 0 ${clicks} times`);
+			} else {
+				console.log(`- The dial is rotated ${instruction} to point at ${currentDial}.`);
+			}
+			
+		}
+	}
+
+
+	return zeroCount;
+}
+
+function countClick(input: Turn, start: number): [ number, number ] {
+	let zeroCount: number = 0;
+	let location: number = 0;
+	let [ direction, distance ]: [ Direction, number ] = input;
+
+	switch(direction) {
+		case 'L':
+			// quick hack to identify starter positions.
+			if(start === 0) start = 100;
+			zeroCount = Math.floor(((100 - start) + distance) / 100);
+			location = 100 - Math.floor(((100 - start) + distance) % 100);
+			break;
+		case 'R':
+			// quick hack to identify ending positions. 
+			if(start === 100) start = 0;
+			zeroCount = Math.floor((start + distance) / 100);
+			location = Math.floor((start + distance) % 100);
+			break;
+	}
+
+	return [ zeroCount, location ];
 }
 
 /**
@@ -128,7 +176,7 @@ function turnTheDial(input: Turn, start: number): number {
 
 try {
 	let instructionArray: Turn[] = await readInputFile(fileName);
-	let zeroCount: number = decodeDialPassword(instructionArray, initialDial);
+	let zeroCount: number = decodeDialPasswordWithClick(instructionArray, initialDial);
 
 	console.log(`\n The password in this configuration is: ${zeroCount}`);
 } catch (err) {
