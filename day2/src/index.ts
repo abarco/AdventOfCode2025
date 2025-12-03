@@ -81,7 +81,10 @@ function addRangedArray(array: Array<number>): number {
     return array.reduce((acc, curr) => acc + curr, 0);
 }
 
+
+
 let ranges: string[] = await readInputFile(fileName);
+console.time('runtime');
 let rangeArray: Range[] = produceRangedArray(ranges);
 let offendingIDs: Array<number> = [];
 for(let r of rangeArray) {
@@ -100,3 +103,4 @@ for(let r of rangeArray) {
 let invalidIDSum: number = addRangedArray(offendingIDs);
 
 console.log(`\x1b[1m\x1b[32mThis is the invalid ID output: \t ${invalidIDSum} \x1b[0m`);
+console.timeEnd('runtime');
