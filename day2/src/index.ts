@@ -2,9 +2,11 @@ import fs from 'fs/promises';
 import path from 'path';
 
 const fileName: string = 'input.txt';
-const patternCheck: RegExp = /^([1-9]\d*)\1$/;
-const patternCheck_two: RegExp =  /^([1-9]\d*)(\1)+$/;
+const PATTERN_PART1: RegExp = /^([1-9]\d*)\1$/;
+const PATTERN_PART2: RegExp =  /^([1-9]\d*)(\1)+$/;
+
 const debugFlag: boolean = Boolean(process.env.npm_config_debug) || false;
+const PART: number = Number(process.env.npm_config_part) || 1;
 
 // Range type with a beginning and end range. 
 type Range = [ number , number ];
@@ -49,27 +51,11 @@ function produceSequence([ start, end ]: Range ): Array<string> {
     return Array.from({ length: (end - start) + 1 }, (_, i) => (start + i).toString());
 }
 
-function checkSequenceForInvalidIDs(sequence: Array<string>): Array<number> {
+function checkSequenceForInvalidIDs(sequence: Array<string>, pattern: RegExp): Array<number> {
     let offendingIDs: Array<number> = [];
 
     for(let sec of sequence) {
-        let matches: Array<string> = sec.match(patternCheck) || [];
-        
-        if(matches && matches.length > 0 && matches[0]) {
-            let offender: string = matches[0];
-            let converted: number = parseInt(offender);
-            offendingIDs.push(converted);
-        }
-    }
-    debugFlag && console.log('Invalid sequences: ', offendingIDs);
-    return offendingIDs;
-}
-
-function checkSequenceForInvalidIDs_two(sequence: Array<string>): Array<number> {
-    let offendingIDs: Array<number> = [];
-
-    for(let sec of sequence) {
-        let matches: Array<string> = sec.match(patternCheck_two) || [];
+        let matches: Array<string> = sec.match(pattern) || [];
         
         if(matches && matches.length > 0 && matches[0]) {
             let offender: string = matches[0];
@@ -100,11 +86,15 @@ let rangeArray: Range[] = produceRangedArray(ranges);
 let offendingIDs: Array<number> = [];
 for(let r of rangeArray) {
     let seq: Array<string> = produceSequence(r);
-    // Part 1
-    // let invalid: Array<number> = checkSequenceForInvalidIDs(seq);
-    // Part 2
-    let invalid: Array<number> = checkSequenceForInvalidIDs_two(seq);
-    offendingIDs.push(...invalid);
+    
+    if(PART === 1) {
+        offendingIDs.push(...checkSequenceForInvalidIDs(seq, PATTERN_PART1));
+        
+    } else if(PART === 2) {
+        offendingIDs.push(...checkSequenceForInvalidIDs(seq, PATTERN_PART2));
+    }
+    
+    
 }
 
 let invalidIDSum: number = addRangedArray(offendingIDs);
