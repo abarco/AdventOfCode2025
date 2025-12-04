@@ -18,6 +18,7 @@ async function readInputFile(fileName: string): Promise<string[]> {
     }
 }
 
+// hardcoded solution for 2 batteries
 function determineJolt(bank: string): number {
   let jolt: number = 0;
   let bankLength: number = bank?.length;
@@ -60,11 +61,57 @@ function determineJolt(bank: string): number {
   return jolt;
 }
 
+// general use for an N amount of batteries called batteryNumber
+function recursiveJolt(bank: string, batteryNumber: number): number {
+  if(batteryNumber < 1) {
+    return 0;
+  }
+  // number of characters we can discard from the bank array at the end. 
+  let step: number = batteryNumber - 1;
+  // number of characters from the start that we'll include
+  let inclusive: number = bank.length - step;
+  // Initial bank. Reducing it from the end by inclusive amount.
+  let initBank: string = bank.slice(0, inclusive);
+
+  let num: number = 0;
+  let numIndex: number = 0;
+
+  for(let i = 0; i < inclusive; i++) {
+    let candidate = Number(bank[i]);
+
+    // is the candidate bigger then current one? If so, let's save that and its index. 
+    if(num < candidate) {
+      num = candidate;
+      numIndex = i;
+    }
+
+    // we don't need to proceed. 9 is king. 
+    if(candidate === 9) break;
+
+  }
+
+  let newBank: string = bank.slice(numIndex + 1);
+  let jolt: string ='' + num + recursiveJolt(newBank, batteryNumber - 1);
+  // removing ending zero from the recursion
+  jolt = jolt.replace('0', '');
+
+  return Number(jolt);
+}
+
 function produceTotalJoltage(banks: string[]): number {
   let joltAddition: number = 0;
 
   for(let bank of banks) {
-    joltAddition += determineJolt(bank);
+    if(PART === 1) {
+      let jolt: number = recursiveJolt(bank, 2);
+      debugFlag && console.log(`Bank: ${bank} \t produces Jolt of ${jolt}`);
+      joltAddition += jolt;
+    } else if(PART === 2) {
+      let jolt: number = recursiveJolt(bank, 12);
+      debugFlag && console.log(`Bank: ${bank} \t produces Jolt of ${jolt}`);
+      joltAddition += jolt;
+    }
+    
   }
 
   return joltAddition;
@@ -74,5 +121,5 @@ let inputs: string[] = await readInputFile(fileName);
 console.time('Runtime');
 let joltAddition: number = produceTotalJoltage(inputs);
 
-console.log(`Your total output joltage is: \t ${joltAddition}`);
+console.log(`\x1b[32mYour total output joltage is: \t ${joltAddition}\x1b[0m`);
 console.timeEnd('Runtime');
