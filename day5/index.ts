@@ -88,45 +88,13 @@ function numberOfFreshFruitPossible(ranges: Range[]): number {
                 return;
             }
 
-            // Range collides to the right
-            // x:     [3  -  7]
-            // p: [1  -  5]
-            //
-            else if(x.start <= p.end && x.start > p.start) {
-                debugFlag && console.log(`this is the x =        (${x.start}, ${x.end})`);
-                debugFlag && console.log(`this is the p = (${p.start}, ${p.end}) \n`);
-
-                // we modify the range to account for collision
-                x.start = p.end + 1;
-                // compare to next itme.
-                return;
-            }
-
-            // Range collides to the left
-            // x: [1  -  5]
-            // p:     [3  -  7]
-            //
-             else if(x.end >= p.start && x.end < p.end) {
-                debugFlag && console.log(`this is the x = (${x.start}, ${x.end})`);
-                debugFlag && console.log(`this is the p =        (${p.start}, ${p.end}) \n`);
-
-                // we modify the range to account for collision
-                x.end = p.start -1;
-
-                // compare to next item.
-                return;
-            }
-
-            // Range is bigger subset
+            // Range is bigger set
             //x: [1     -       10]
             //p:     [4 - 8]
             //
             else if(x.start <= p.start && x.end >= p.end) {
                 debugFlag && console.log(`this is the x =        (${x.start}     ,       ${x.end})`);
                 debugFlag && console.log(`this is the p =             (${p.start}, ${p.end}) \n`);
-
-                // // we need to remove p, as a more inclusive range has come
-                // listOfRanges.splice(i, 1);
 
                 // we're going to invalidate this element
                 listOfRanges[i] = { start: 0, end: -1 };
@@ -152,13 +120,45 @@ function numberOfFreshFruitPossible(ranges: Range[]): number {
                 return;
             }
 
-            else {
-                console.log('UNCHARTED WATERS!!!');
-                console.log(`this is the x = (${x.start}, ${x.end})`);
-                console.log(`this is the p = (${p.start}, ${p.end}) \n`);
+            // Range collides to the right
+            // x:     [3  -  7]
+            // p: [1  -  5]
+            //
+            else if(x.start <= p.end && x.start > p.start) {
+                debugFlag && console.log(`this is the x =        (${x.start}, ${x.end})`);
+                debugFlag && console.log(`this is the p = (${p.start}, ${p.end}) \n`);
+
+                // we modify the range to account for collision
+                x.start = p.end + 1;
+                // compare to next itme.
+                return;
+            }
+
+            // Range collides to the left
+            // x: [1  -  5]
+            // p:     [3  -  7]
+            //
+             else if(x.end >= p.start && x.end < p.end) {
+                debugFlag && console.log(`this is the x = (${x.start}, ${x.end})`);
+                debugFlag && console.log(`this is the p =        (${p.start}, ${p.end}) \n`);
+
+                // we modify the range to account for collision
+                x.end = p.start -1;
+                
+                // if we made the range invalid, we remove it. Not needed
+                if(x.start > x.end) {
+                    x =  {
+                        start: 0,
+                        end: -1
+                    };
+                }
+
+                // compare to next item.
+                return;
             }
         });
-        
+
+        // we want to remove invalid entries. 
         listOfRanges = listOfRanges.filter(range => !(range.start === 0 && range.end === -1));
 
         // After iterating, if we didn't mark it, or modify further
@@ -167,11 +167,8 @@ function numberOfFreshFruitPossible(ranges: Range[]): number {
             listOfRanges.push(x);
         }
 
-        if(x.start === 0 && x.end === -1) {
-            console.log(' we got one invalid!', x);
-        }
-
     });
+
     debugFlag && console.log('\x1b[32m%s\x1b[0m', 'Final List Ranges: ', JSON.stringify(listOfRanges));
     // Now with a clean list of non-colliding ranges
     for(let range of listOfRanges) {
